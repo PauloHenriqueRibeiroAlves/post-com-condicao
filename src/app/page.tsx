@@ -1,19 +1,48 @@
 "use client"
 
-import { Chat } from "./components/Chat";
-import { ChatProvider } from "./contexts/ChatContext";
-import { UserProvider } from "./contexts/UserContext";
+import { Post } from "./types/Post";
+import { useEffect, useState } from "react";
+
 
 const Page = () => { 
-  return (
-    <div className="container mx-auto max-w-lg px-2 bg-black/60">
-      <UserProvider>
-        <ChatProvider>
-          <h1 className="text-3xl my-3 text-center text-white">Chat simples</h1>
+  const [possts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(false);
 
-          <Chat/>
-        </ChatProvider>
-      </UserProvider>           
+  useEffect(() => {
+    loadPosts();
+  }, []);
+  const loadPosts = async () => {
+    let response = await fetch('https://jsonplaceholder.typicode.com/posts');
+    let json = await response.json();
+    setPosts(json);
+  }
+  
+  return (
+    <div className="p-5">
+      
+      {loading &&
+        <div>Carregando, espere...</div>
+      }
+      
+      {!loading && possts.length > 0 &&
+        <>
+          <div>Total de Posts: {possts.length}</div>
+          <div>
+            {possts.map((item, index) => (
+              <div key={index} className="my-4">
+                <h4 className="font-bold">{item.title}</h4>
+                <small>#{item.id} - Usuário: {item.userId}</small>
+                <p>{item.body}</p>
+              </div>
+            ))}
+          </div>
+        </>
+      }
+      {!loading && possts.length === 0 &&
+        <div>Não ha posts para exibir.</div>
+      }
+
+      
     </div>             
   );
 }
